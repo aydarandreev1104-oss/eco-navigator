@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ЭкоНавигатор - Пункты приёма вторсырья</title>
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+background: #f5f5f5;
+overflow-x: hidden;
+}
+.container {
+display: flex;
+min-height: 100vh;
+}
+.sidebar {
+width: 380px;
+background: white;
+border-right: 1px solid #e0e0e0;
+display: flex;
+flex-direction: column;
+box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+z-index: 1000;
+flex-shrink: 0;
+}
+.logo {
+padding: 20px 24px;
+border-bottom: 1px solid #f0f0f0;
+display: flex;
+justify-content: center;
+align-items: center;
+flex-shrink: 0;
+}
+.logo-img {
+max-width: 100%;
+height: auto;
+max-height: 80px;
+}
+.filters-section {
+padding: 16px 24px;
+border-bottom: 1px solid #f0f0f0;
+flex-shrink: 0;
+}
+.filters-section h3 {
+font-size: 14px;
+font-weight: 600;
+color: #212121;
+margin-bottom: 12px;
+}
+.filter-tags {
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+}
+.filter-tag {
+display: inline-flex;
+align-items: center;
+gap: 6px;
+padding: 6px 12px;
+background: #f5f5f5;
+border: 1px solid #e0e0e0;
+border-radius: 20px;
+cursor: pointer;
+font-size: 13px;
+color: #424242;
+transition: all 0.2s ease;
+user-select: none;
+}
+.filter-tag:hover {
+background: #e8f5e9;
+border-color: #a5d6a7;
+}
+.filter-tag.active {
+background: #2e7d32;
+color: white;
+border-color: #2e7d32;
+}
+.filter-tag .tag-icon {
+font-size: 14px;
+}
+.filter-tag .tag-count {
+font-size: 11px;
+opacity: 0.8;
+background: rgba(255,255,255,0.3);
+padding: 1px 6px;
+border-radius: 10px;
+}
+.reset-filters {
+margin-top: 10px;
+font-size: 12px;
+color: #2e7d32;
+cursor: pointer;
+background: none;
+border: none;
+text-decoration: underline;
+}
+.reset-filters:hover {
+color: #1b5e20;
+}
+.points-list {
+flex: 1;
+overflow-y: auto;
+padding: 20px 24px;
+}
+.points-list h2 {
+font-size: 18px;
+font-weight: 600;
+color: #212121;
+margin-bottom: 16px;
+}
+.point-item {
+margin-bottom: 12px;
+border: 1px solid #e0e0e0;
+border-radius: 8px;
+overflow: hidden;
+transition: all 0.3s;
+background: #fafafa;
+}
+.point-item:hover {
+box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.point-item.filtered-out {
+display: none;
+}
+.point-header {
+padding: 12px 16px;
+display: flex;
+align-items: center;
+gap: 12px;
+cursor: pointer;
+}
+.list-icon {
+width: 28px;
+height: 28px;
+object-fit: contain;
+flex-shrink: 0;
+}
+.point-name {
+flex: 1;
+font-weight: 500;
+color: #424242;
+font-size: 15px;
+}
+.toggle-arrow {
+color: #757575;
+font-size: 12px;
+transition: transform 0.3s;
+}
+.point-item.active .toggle-arrow {
+transform: rotate(90deg);
+}
+.point-details {
+padding: 0 16px 12px 56px;
+background: white;
+}
+.point-details.hidden {
+display: none;
+}
+.detail-item {
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 6px 0;
+font-size: 14px;
+color: #616161;
+}
+.action-buttons {
+padding: 16px 24px;
+display: flex;
+flex-direction: column;
+gap: 10px;
+border-top: 1px solid #f0f0f0;
+background: #fff;
+flex-shrink: 0;
+}
+.btn {
+width: 100%;
+padding: 12px 16px;
+border-radius: 8px;
+border: none;
+font-size: 14px;
+font-weight: 600;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+transition: all 0.2s ease;
+}
+.btn:hover {
+transform: translateY(-2px);
+}
+.btn-primary {
+background: #2e7d32;
+color: white;
+box-shadow: 0 2px 5px rgba(46, 125, 50, 0.3);
+}
+.btn-primary:hover { background: #1b5e20; }
+.btn-secondary {
+background: #e8f5e9;
+color: #2e7d32;
+border: 1px solid #c8e6c9;
+}
+.btn-secondary:hover { background: #c8e6c9; }
+.sidebar-footer {
+padding: 15px 24px;
+border-top: 1px solid #e0e0e0;
+display: flex;
+justify-content: space-between;
+align-items: center;
+background: #fafafa;
+flex-shrink: 0;
+}
+.share-btn {
+display: flex;
+align-items: center;
+gap: 6px;
+padding: 8px 12px;
+background: #f5f5f5;
+color: #424242;
+border: none;
+border-radius: 6px;
+cursor: pointer;
+font-size: 13px;
+}
+.share-btn:hover { background: #e0e0e0; }
+.faq-link {
+color: #2e7d32;
+text-decoration: none;
+font-weight: 600;
+font-size: 13px;
+cursor: pointer;
+}
+.faq-link:hover { text-decoration: underline; }
+.map-container {
+flex: 1;
+position: relative;
+}
+#map {
+width: 100%;
+height: 100%;
+}
+.map-controls {
+position: absolute;
+top: 16px;
+right: 16px;
+z-index: 1000;
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+.view-toggle {
+display: flex;
+background: white;
+border-radius: 6px;
+overflow: hidden;
+box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.view-toggle button {
+padding: 8px 14px;
+border: none;
+background: white;
+cursor: pointer;
+font-weight: 600;
+font-size: 12px;
+text-transform: uppercase;
+}
+.view-toggle button.active {
+background: #2e7d32;
+color: white;
+}
+.collapse-btn {
+padding: 8px 14px;
+background: #212121;
+color: white;
+border: none;
+border-radius: 6px;
+cursor: pointer;
+font-weight: 600;
+font-size: 12px;
+box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.balloon-content {
+padding: 12px;
+font-family: inherit;
+animation: balloonSlideIn 0.3s ease-out !important;
+}
+.balloon-header {
+font-weight: 600;
+font-size: 16px;
+color: #212121;
+margin-bottom: 8px;
+}
+.balloon-info {
+font-size: 13px;
+color: #666;
+margin-bottom: 4px;
+}
+.balloon-materials {
+margin-top: 8px;
+display: flex;
+gap: 6px;
+flex-wrap: wrap;
+}
+.material-tag {
+background: #f0f0f0;
+padding: 4px 8px;
+border-radius: 4px;
+font-size: 11px;
+color: #333;
+}
+@keyframes balloonSlideIn {
+0% {
+opacity: 0;
+transform: translateY(10px);
+}
+100% {
+opacity: 1;
+transform: translateY(0);
+}
+}
+/* FAQ Page Styles */
+.faq-page {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: #f5f5f5;
+z-index: 2000;
+overflow-y: auto;
+}
+.faq-page.active {
+display: block;
+}
+.faq-header {
+background: white;
+padding: 30px 24px;
+border-bottom: 1px solid #e0e0e0;
+display: flex;
+align-items: center;
+justify-content: space-between;
+position: sticky;
+top: 0;
+z-index: 10;
+}
+.faq-header h2 {
+font-size: 28px;
+color: #212121;
+text-align: center;
+flex: 1;
+margin: 0;
+}
+.faq-close {
+background: none;
+border: none;
+font-size: 32px;
+cursor: pointer;
+color: #757575;
+width: 44px;
+height: 44px;
+display: flex;
+align-items: center;
+justify-content: center;
+border-radius: 50%;
+transition: all 0.2s;
+flex-shrink: 0;
+}
+.faq-close:hover {
+background: #f5f5f5;
+color: #212121;
+transform: rotate(90deg);
+}
+.faq-content {
+max-width: 800px;
+margin: 0 auto;
+padding: 40px 24px;
+}
+.faq-intro {
+background: white;
+padding: 24px;
+border-radius: 12px;
+margin-bottom: 32px;
+box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.faq-intro p {
+color: #424242;
+line-height: 1.6;
+margin-bottom: 12px;
+}
+.faq-item {
+background: white;
+border-radius: 12px;
+margin-bottom: 16px;
+overflow: hidden;
+box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.faq-question {
+padding: 20px 24px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+cursor: pointer;
+transition: background 0.2s;
+}
+.faq-question:hover {
+background: #fafafa;
+}
+.faq-question-text {
+flex: 1;
+font-weight: 600;
+color: #212121;
+font-size: 16px;
+padding-right: 16px;
+}
+.faq-icon {
+width: 28px;
+height: 28px;
+background: #2e7d32;
+color: white;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+font-size: 20px;
+transition: transform 0.3s;
+}
+.faq-item.active .faq-icon {
+transform: rotate(45deg);
+}
+.faq-answer {
+max-height: 0;
+overflow: hidden;
+transition: max-height 0.3s ease-out;
+}
+.faq-item.active .faq-answer {
+max-height: 800px;
+}
+.faq-answer-content {
+padding: 0 24px 20px 24px;
+color: #616161;
+line-height: 1.6;
+}
+.faq-answer-content ul {
+margin: 12px 0;
+padding-left: 24px;
+}
+.faq-answer-content li {
+margin-bottom: 8px;
+}
+.faq-answer-content strong {
+color: #212121;
+}
+@media (max-width: 768px) {
+.sidebar {
+width: 100%;
+position: absolute;
+height: 45%;
+bottom: 0;
+border-right: none;
+border-top: 1px solid #ddd;
+}
+.map-container {
+height: 55%;
+}
+.faq-content {
+padding: 24px 16px;
+}
+.faq-header h2 {
+font-size: 22px;
+}
+}
+.points-list::-webkit-scrollbar {
+width: 6px;
+}
+.points-list::-webkit-scrollbar-track {
+background: #f5f5f5;
+}
+.points-list::-webkit-scrollbar-thumb {
+background: #bdbdbd;
+border-radius: 3px;
+}
+.no-results {
+text-align: center;
+padding: 40px 20px;
+color: #757575;
+font-size: 14px;
+}
+.no-results .no-results-icon {
+font-size: 40px;
+margin-bottom: 12px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<aside class="sidebar">
+<div class="logo">
+<img src="images/logo.png" alt="ЭкоНавигатор" class="logo-img">
+</div>
+
+<div class="filters-section">
+<h3>Фильтр по типу сырья:</h3>
+<div class="filter-tags" id="filterTags">
+<button class="filter-tag active" data-filter="all" onclick="toggleFilter(this)">
+<span class="tag-icon">♻️</span>
+Все
+<span class="tag-count" id="count-all">5</span>
+</button>
+<button class="filter-tag" data-filter="glass" onclick="toggleFilter(this)">
+<span class="tag-icon">🍶</span>
+Стекло
+<span class="tag-count" id="count-glass">2</span>
+</button>
+<button class="filter-tag" data-filter="paper" onclick="toggleFilter(this)">
+<span class="tag-icon">📄</span>
+Бумага
+<span class="tag-count" id="count-paper">2</span>
+</button>
+<button class="filter-tag" data-filter="plastic" onclick="toggleFilter(this)">
+<span class="tag-icon">🧴</span>
+Пластик
+<span class="tag-count" id="count-plastic">3</span>
+</button>
+<button class="filter-tag" data-filter="metal" onclick="toggleFilter(this)">
+<span class="tag-icon">🔧</span>
+Металл
+<span class="tag-count" id="count-metal">1</span>
+</button>
+<button class="filter-tag" data-filter="batteries" onclick="toggleFilter(this)">
+<span class="tag-icon">🔋</span>
+Батарейки
+<span class="tag-count" id="count-batteries">1</span>
+</button>
+<button class="filter-tag" data-filter="electronics" onclick="toggleFilter(this)">
+<span class="tag-icon">⚡</span>
+Электроника
+<span class="tag-count" id="count-electronics">1</span>
+</button>
+<button class="filter-tag" data-filter="textiles" onclick="toggleFilter(this)">
+<span class="tag-icon">👕</span>
+Текстиль
+<span class="tag-count" id="count-textiles">1</span>
+</button>
+</div>
+<button class="reset-filters" onclick="resetFilters()">Сбросить фильтры</button>
+</div>
+
+<div class="points-list">
+<h2>Пункты приема вторсырья:</h2>
+
+<div class="point-item" data-type="ecosfera" data-materials="glass,paper,plastic">
+<div class="point-header">
+<img src="images/icon-green.png" alt="icon" class="list-icon">
+<span class="point-name">Пункт приема «Экосфера»</span>
+<span class="toggle-arrow">▼</span>
+</div>
+<div class="point-details">
+<div class="detail-item">🍶 прием стекла</div>
+<div class="detail-item">📄 прием макулатуры</div>
+<div class="detail-item">🧴 прием пластика 1-2</div>
+</div>
+</div>
+
+<div class="point-item" data-type="chuvashvtormet" data-materials="metal,batteries,electronics">
+<div class="point-header">
+<img src="images/icon-pink.png" alt="icon" class="list-icon">
+<span class="point-name">Пункт приема «Чувашвтормет»</span>
+<span class="toggle-arrow">▶</span>
+</div>
+<div class="point-details hidden">
+<div class="detail-item">🔧 металлолом</div>
+<div class="detail-item">🔋 батарейки</div>
+<div class="detail-item">⚡ электроника</div>
+</div>
+</div>
+
+<div class="point-item" data-type="ecotec" data-materials="textiles">
+<div class="point-header">
+<img src="images/icon-blue.png" alt="icon" class="list-icon">
+<span class="point-name">Пункт приема «Экотек»</span>
+<span class="toggle-arrow">▶</span>
+</div>
+<div class="point-details hidden">
+<div class="detail-item">👕 текстиль</div>
+<div class="detail-item">👟 обувь</div>
+</div>
+</div>
+
+<div class="point-item" data-type="moscow-point" data-materials="plastic,glass,paper">
+<div class="point-header">
+<img src="images/icon-green.png" alt="icon" class="list-icon">
+<span class="point-name">Экопункт на Московском</span>
+<span class="toggle-arrow">▶</span>
+</div>
+<div class="point-details hidden">
+<div class="detail-item">🧴 пластик</div>
+<div class="detail-item">🍶 стекло</div>
+<div class="detail-item">📄 бумага</div>
+</div>
+</div>
+
+<div class="point-item" data-type="zhk-point" data-materials="plastic,paper">
+<div class="point-header">
+<img src="images/icon-blue.png" alt="icon" class="list-icon">
+<span class="point-name">Сбор вторсырья ЖК</span>
+<span class="toggle-arrow">▶</span>
+</div>
+<div class="point-details hidden">
+<div class="detail-item">🧴 пластик</div>
+<div class="detail-item">📄 бумага</div>
+</div>
+</div>
+
+<div class="no-results" id="noResults" style="display: none;">
+<div class="no-results-icon">🔍</div>
+<p>Нет пунктов, принимающих выбранный тип сырья</p>
+</div>
+</div>
+
+<div class="action-buttons">
+<button class="btn btn-primary" onclick="window.open('https://forms.google.com/your-link-1', '_blank')">
+Предложить новое место
+</button>
+<button class="btn btn-secondary" onclick="window.open('https://forms.google.com/your-link-2', '_blank')">
+Появился новый пункт приема
+</button>
+</div>
+
+<div class="sidebar-footer">
+<button class="share-btn" onclick="shareProject()">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle>
+<circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+<line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+</svg>
+Поделиться
+</button>
+<a class="faq-link" onclick="openFAQ()">❓ FAQ</a>
+</div>
+</aside>
+
+<main class="map-container">
+<div class="map-controls">
+<div class="view-toggle">
+<button class="active" onclick="switchView('map')">Карта</button>
+<button onclick="switchView('satellite')">Спутник</button>
+</div>
+<button class="collapse-btn" onclick="toggleSidebar()">Свернуть меню</button>
+</div>
+<div id="map"></div>
+</main>
+</div>
+
+<!-- FAQ Page -->
+<div class="faq-page" id="faqPage">
+<div class="faq-header">
+<h2>Часто задаваемые вопросы</h2>
+<button class="faq-close" onclick="closeFAQ()">×</button>
+</div>
+<div class="faq-content">
+<div class="faq-intro">
+<p><strong>ЭкоНавигатор</strong> — это удобный инструмент для поиска пунктов приёма вторсырья в Чебоксарах. Здесь собраны ответы на самые популярные вопросы о раздельном сборе отходов и работе нашего сервиса.</p>
+</div>
+
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQItem(this)">
+<div class="faq-question-text">Что такое раздельный сбор отходов и зачем он нужен?</div>
+<div class="faq-icon">+</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-content">
+Раздельный сбор отходов (РСО) — это система, при которой разные виды мусора (пластик, бумага, стекло, металл) собираются отдельно друг от друга для последующей переработки.<br><br>
+<strong>Это важно, потому что:</strong>
+<ul>
+<li>Снижается объём захораниваемых отходов на полигонах</li>
+<li>Экономятся природные ресурсы (нефть, древесина, руда)</li>
+<li>Уменьшается загрязнение окружающей среды</li>
+<li>Переработка требует меньше энергии, чем производство с нуля</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQItem(this)">
+<div class="faq-question-text">Как подготовить вторсырьё к сдаче?</div>
+<div class="faq-icon">+</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-content">
+<strong>Основные правила подготовки:</strong>
+<ul>
+<li><strong>Пластик:</strong> ополоснуть от остатков пищи, снять крышки (если они из другого пластика), удалить этикетки</li>
+<li><strong>Стекло:</strong> промыть, удалить металлические крышки</li>
+<li><strong>Бумага:</strong> удалить скрепки, скобы, плёнку; картон сложить плоско</li>
+<li><strong>Металл:</strong> очистить от загрязнений</li>
+<li><strong>Батарейки:</strong> заклеить контакты скотчем (для литиевых)</li>
+<li><strong>Текстиль:</strong> должен быть чистым и сухим</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQItem(this)">
+<div class="faq-question-text">Какие виды пластика принимают в Чебоксарах?</div>
+<div class="faq-icon">+</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-content">
+Большинство пунктов принимают пластик с маркировками:
+<ul>
+<li><strong>    1 (PET/ПЭТ)</strong> — бутылки от напитков</li>
+<li><strong>    2 (HDPE/ПНД)</strong> — канистры, флаконы от бытовой химии</li>
+<li><strong>    4 (LDPE/ПВД)</strong> — плёнка, пакеты</li>
+<li><strong>    5 (PP/ПП)</strong> — контейнеры, крышки</li>
+</ul>
+<strong>Важно:</strong> пластик 3 (PVC), 6 (PS) и 7 (Other) обычно не принимают — они сложно перерабатываются.
+</div>
+</div>
+</div>
+
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQItem(this)">
+<div class="faq-question-text">Принимают ли вторсырьё бесплатно или за деньги?</div>
+<div class="faq-icon">+</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-content">
+Это зависит от типа сырья и пункта приёма:
+<ul>
+<li><strong>Бесплатно:</strong> большинство экопунктов принимают пластик, стекло, бумагу безвозмездно</li>
+<li><strong>За деньги:</strong> некоторые пункты платят за макулатуру (от 3 до 8 руб/кг), металлолом (цена зависит от типа металла), картон</li>
+<li><strong>Батарейки и электроника:</strong> обычно принимаются бесплатно</li>
+</ul>
+В карточке каждого пункта на карте указан тип приёма.
+</div>
+</div>
+</div>
+
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQItem(this)">
+<div class="faq-question-text">Как использовать карту ЭкоНавигатора?</div>
+<div class="faq-icon">+</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-content">
+<strong>Пошаговая инструкция:</strong>
+<ol>
+<li>Откройте карту на сайте или в приложении</li>
+<li>Используйте фильтры для выбора типа сырья (пластик, стекло и т.д.)</li>
+<li>Найдите ближайший пункт на карте или в списке слева</li>
+<li>Нажмите на метку, чтобы увидеть подробности: адрес, график работы, что принимают</li>
+<li>Постройте маршрут, нажав на адрес</li>
+</ol>
+<strong>Совет:</strong> включите геолокацию, чтобы карта показала пункты рядом с вами.
+</div>
+</div>
+</div>
+
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQItem(this)">
+<div class="faq-question-text">Что делать, если пункт приёма закрыт или переехал?</div>
+<div class="faq-icon">+</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-content">
+Мы стараемся поддерживать актуальность данных, но информация может устареть. Если вы столкнулись с проблемой:
+<ol>
+<li>Нажмите кнопку «Появился новый пункт приема» или «Сообщить об изменении»</li>
+<li>Опишите ситуацию (пункт закрылся, изменился график, переехал)</li>
+<li>Мы проверим информацию в течение 48 часов и обновим данные</li>
+</ol>
+Также вы можете позвонить в пункт по указанному телефону перед визитом.
+</div>
+</div>
+</div>
+
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQItem(this)">
+<div class="faq-question-text">Можно ли сдать крупногабаритные вещи (мебель, технику)?</div>
+<div class="faq-icon">+</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-content">
+Да, но не все пункты принимают крупногабарит:
+<ul>
+<li><strong>Бытовая техника:</strong> принимают пункты «Чувашвтормет» и специализированные центры</li>
+<li><strong>Мебель:</strong> некоторые пункты принимают деревянную мебель для переработки</li>
+<li><strong>Электроника:</strong> принимают большинство экопунктов</li>
+</ul>
+<strong>Важно:</strong> перед визитом обязательно позвоните и уточните, принимают ли они ваш тип крупногабарита и есть ли ограничения по размеру.
+</div>
+</div>
+</div>
+
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQItem(this)">
+<div class="faq-question-text">Как предложить новый пункт приёма для добавления на карту?</div>
+<div class="faq-icon">+</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-content">
+Если вы знаете о пункте, которого нет на карте:
+<ol>
+<li>Нажмите кнопку «Предложить новое место»</li>
+<li>Заполните форму: название, адрес, график работы, что принимают</li>
+<li>Приложите фото (если есть)</li>
+<li>Оставьте свои контакты для обратной связи</li>
+<li>Мы проверим информацию и добавим пункт в течение 3-5 дней</li>
+</ol>
+Вы также можете написать нам в социальные сети или на почту.
+</div>
+</div>
+</div>
+
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQItem(this)">
+<div class="faq-question-text">Почему важно сдавать батарейки и аккумуляторы отдельно?</div>
+<div class="faq-icon">+</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-content">
+<strong>Батарейки содержат опасные вещества:</strong>
+<ul>
+<li>Одна пальчиковая батарейка загрязняет 20 м² почвы</li>
+<li>В составе: свинец, кадмий, ртуть, литий — тяжёлые металлы</li>
+<li>При попадании на свалку токсины проникают в грунтовые воды</li>
+</ul>
+<strong>Как сдавать:</strong>
+<ul>
+<li>Запакуйте каждую батарейку в отдельный пакет или заклейте контакты скотчем</li>
+<li>Не храните дома долго — сдавайте сразу после использования</li>
+<li>Литиевые аккумуляторы (от телефонов, ноутбуков) тоже принимают</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQItem(this)">
+<div class="faq-question-text">Как часто обновляется информация на карте?</div>
+<div class="faq-icon">+</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-content">
+<strong>Мы поддерживаем актуальность данных:</strong>
+<ul>
+<li>Автоматическая проверка пунктов — раз в 30 дней</li>
+<li>Обновление по сообщениям пользователей — в течение 48 часов</li>
+<li>Полная ревизия всех пунктов — раз в квартал</li>
+</ul>
+Если вы заметили неточность, пожалуйста, сообщите нам — это поможет другим пользователям. Мы также публикуем ежемесячные отчёты о добавленных и удалённых точках в наших социальных сетях.
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<script src="https://api-maps.yandex.ru/2.1/?apikey=bfc5429a-dbe6-4f3a-9b59-f1434beae5f6&lang=ru_RU" type="text/javascript"></script>
+<script>
+const pointsData = [
+{
+id: 1, name: "Пункт приема «Экосфера»",
+lat: 56.135373, lng: 47.248689, address: "ул. Логинова, 45А",
+hours: "08:00 - 20:00", color: "green",
+materials: ["стекло", "макулатура", "пластик"],
+filterTypes: ["glass", "paper", "plastic"]
+},
+{
+id: 2, name: "Пункт приема «Чувашвтормет»",
+lat: 56.152966, lng: 47.241925, address: "ул. К. Иванова, 26",
+hours: "09:00 - 18:00", color: "pink",
+materials: ["металл", "электроника", "батарейки"],
+filterTypes: ["metal", "electronics", "batteries"]
+},
+{
+id: 3, name: "Пункт приема «Экотек»",
+lat: 56.120839, lng: 47.268650, address: "ул. К. Николаева, 14",
+hours: "10:00 - 19:00", color: "blue",
+materials: ["текстиль", "обувь"],
+filterTypes: ["textiles"]
+},
+{
+id: 4, name: "Экопункт на Московском",
+lat: 56.102182, lng: 47.292473, address: "ул. Кадыкова, 8",
+hours: "08:00 - 20:00", color: "green",
+materials: ["пластик", "стекло", "бумага"],
+filterTypes: ["plastic", "glass", "paper"]
+},
+{
+id: 5, name: "Сбор вторсырья ЖК",
+lat: 56.125, lng: 47.260, address: "ул. Гагарина, 22",
+hours: "Круглосуточно", color: "blue",
+materials: ["пластик", "бумага"],
+filterTypes: ["plastic", "paper"]
+}
+];
+
+let myMap;
+let objectManager;
+let activeFilters = new Set();
+
+ymaps.ready(init);
+
+function init() {
+myMap = new ymaps.Map("map", {
+center: [56.13, 47.25],
+zoom: 13,
+controls: ['zoomControl', 'geolocationControl']
+});
+
+objectManager = new ymaps.ObjectManager({
+clusterize: true,
+clusterIcons: [{
+href: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDQiIGhlaWdodD0iNDQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQ0IiBoZWlnaHQ9IjQ0IiByeD0iMTAiIGZpbGw9IiMyZTdkMzIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1zaXplPSIxOCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7imLw8L3RleHQ+PC9zdmc+',
+offset: [-22, -22]
+}],
+clusterCaption: '',
+hideIconOnBalloonOpen: false
+});
+
+myMap.geoObjects.add(objectManager);
+
+updatePointsOnMap();
+
+objectManager.balloon.events.add('open', function() {
+setTimeout(function() {
+var balloonContent = document.querySelector('.balloon-content');
+if (balloonContent) {
+balloonContent.style.opacity = '0';
+balloonContent.style.transform = 'translateY(10px)';
+balloonContent.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
+setTimeout(function() {
+balloonContent.style.opacity = '1';
+balloonContent.style.transform = 'translateY(0)';
+}, 50);
+}
+}, 100);
+});
+
+updateFilterCounts();
+}
+
+function updatePointsOnMap() {
+objectManager.removeAll();
+
+pointsData.forEach(point => {
+const feature = {
+type: 'Feature',
+id: point.id,
+geometry: {
+type: 'Point',
+coordinates: [point.lat, point.lng]
+},
+properties: {
+balloonContentHeader: point.name,
+balloonContentBody: `
+<div class="balloon-content">
+<div class="balloon-header">${point.name}</div>
+<div class="balloon-info">📍 ${point.address}</div>
+<div class="balloon-info">🕐 ${point.hours}</div>
+<div class="balloon-materials">
+${point.materials.map(m => `<span class="material-tag">${m}</span>`).join('')}
+</div>
+</div>
+`,
+hintContent: point.name
+},
+options: {
+iconLayout: 'default#image',
+iconImageHref: point.color === 'green' ? 'images/icon-green.png' : 
+point.color === 'pink' ? 'images/icon-pink.png' : 'images/icon-blue.png',
+iconImageSize: [30, 30],
+iconImageOffset: [-15, -15]
+}
+};
+objectManager.add(feature);
+});
+}
+
+function toggleFilter(btn) {
+const filterType = btn.dataset.filter;
+
+if (filterType === 'all') {
+activeFilters.clear();
+document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+btn.classList.add('active');
+} else {
+document.querySelector('.filter-tag[data-filter="all"]').classList.remove('active');
+if (btn.classList.contains('active')) {
+btn.classList.remove('active');
+activeFilters.delete(filterType);
+} else {
+btn.classList.add('active');
+activeFilters.add(filterType);
+}
+if (activeFilters.size === 0) {
+document.querySelector('.filter-tag[data-filter="all"]').classList.add('active');
+}
+}
+
+applyFilters();
+}
+
+function applyFilters() {
+const pointItems = document.querySelectorAll('.point-item');
+let visibleCount = 0;
+
+pointItems.forEach(item => {
+const materials = item.dataset.materials.split(',');
+
+if (activeFilters.size === 0) {
+item.classList.remove('filtered-out');
+visibleCount++;
+} else {
+const hasMatch = Array.from(activeFilters).some(f => materials.includes(f));
+if (hasMatch) {
+item.classList.remove('filtered-out');
+visibleCount++;
+} else {
+item.classList.add('filtered-out');
+}
+}
+});
+
+document.getElementById('noResults').style.display = visibleCount === 0 ? 'block' : 'none';
+}
+
+function resetFilters() {
+activeFilters.clear();
+document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+document.querySelector('.filter-tag[data-filter="all"]').classList.add('active');
+applyFilters();
+}
+
+function updateFilterCounts() {
+const counts = {
+all: 0, glass: 0, paper: 0, plastic: 0, metal: 0, 
+batteries: 0, electronics: 0, textiles: 0
+};
+
+pointsData.forEach(point => {
+counts.all++;
+point.filterTypes.forEach(type => {
+if (counts[type] !== undefined) counts[type]++;
+});
+});
+
+Object.keys(counts).forEach(key => {
+const el = document.getElementById('count-' + key);
+if (el) el.textContent = counts[key];
+});
+}
+
+function switchView(view) {
+const buttons = document.querySelectorAll('.view-toggle button');
+buttons.forEach(btn => btn.classList.remove('active'));
+if (view === 'map') {
+myMap.setType('yandex#map');
+buttons[0].classList.add('active');
+} else {
+myMap.setType('yandex#satellite');
+buttons[1].classList.add('active');
+}
+}
+
+document.querySelectorAll('.point-header').forEach(header => {
+header.addEventListener('click', function() {
+const item = this.parentElement;
+const details = item.querySelector('.point-details');
+const arrow = item.querySelector('.toggle-arrow');
+item.classList.toggle('active');
+if (details.classList.contains('hidden')) {
+details.classList.remove('hidden');
+arrow.textContent = '▼';
+} else {
+details.classList.add('hidden');
+arrow.textContent = '▶';
+}
+});
+});
+
+function toggleSidebar() {
+document.querySelector('.sidebar').classList.toggle('collapsed');
+setTimeout(() => myMap.container.fitToViewport(), 300);
+}
+
+function shareProject() {
+if (navigator.share) {
+navigator.share({ title: 'ЭкоНавигатор', url: window.location.href });
+} else {
+navigator.clipboard.writeText(window.location.href);
+alert('Ссылка скопирована!');
+}
+}
+
+// FAQ Functions
+function openFAQ() {
+document.getElementById('faqPage').classList.add('active');
+document.body.style.overflow = 'hidden';
+}
+
+function closeFAQ() {
+document.getElementById('faqPage').classList.remove('active');
+document.body.style.overflow = 'auto';
+}
+
+function toggleFAQItem(element) {
+const faqItem = element.parentElement;
+const isActive = faqItem.classList.contains('active');
+
+// Close all items
+document.querySelectorAll('.faq-item').forEach(item => {
+item.classList.remove('active');
+});
+
+// Open clicked item if it wasn't active
+if (!isActive) {
+faqItem.classList.add('active');
+}
+}
+
+// Close FAQ on Escape key
+document.addEventListener('keydown', function(e) {
+if (e.key === 'Escape') {
+closeFAQ();
+}
+});
+
+window.addEventListener('resize', () => {
+if (myMap) myMap.container.fitToViewport();
+});
+</script>
+</body>
+</html>
